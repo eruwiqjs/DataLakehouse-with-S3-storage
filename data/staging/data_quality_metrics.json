@@ -1,0 +1,8 @@
+{
+  "total_rows": 499715,
+  "unique_users": 92750,
+  "unique_products": 48311,
+  "unique_brands": 2376,
+  "zero_price_count": 563,
+  "data_quality_score": 100.0
+}

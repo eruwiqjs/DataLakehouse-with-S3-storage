@@ -1,0 +1,42 @@
+@startuml
+!theme plain
+title Data Flow Diagram (DFD Level 1)
+
+actor "Data Engineer" as Dev
+actor "BI Analyst" as Analyst
+
+rectangle "Raw Layer" as Raw {
+  database "ecommerce_behavior.csv" as CSV
+}
+
+rectangle "Processing Layer" as ETL {
+  component "load_raw.py"
+  component "clean_staging.py"
+  component "create_marts.py"
+}
+
+rectangle "Staging Layer" as Staging {
+  database "cleaned_data.parquet"
+}
+
+rectangle "Data Mart Layer" as Mart {
+  database "dim_users.csv"
+  database "dim_products.csv"
+  database "dim_categories.csv"
+  database "fact_events.csv"
+}
+
+rectangle "BI Layer" as BI {
+  component "Power BI / Superset"
+}
+
+Dev --> CSV : Загружает данные
+CSV --> load_raw.py : Проверка и загрузка
+load_raw.py --> clean_staging.py : Передача пути
+clean_staging.py --> cleaned_data.parquet : Очистка чанками
+clean_staging.py --> create_marts.py : Запуск следующего шага
+create_marts.py --> Mart : Формирование витрин
+Mart --> BI : Передача данных для визуализации
+Analyst --> BI : Аналитика, отчёты
+
+@enduml

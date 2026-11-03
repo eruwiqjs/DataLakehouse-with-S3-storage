@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+title E-Commerce ERD (Data Mart Layer)
+
+entity "fact_events" as fact {
+  * event_id : bigint
+  --
+  event_time : datetime
+  event_type : varchar
+  price : decimal
+  user_id : bigint
+  product_id : bigint
+  session_id : varchar
+}
+
+entity "dim_users" as users {
+  * user_id : bigint
+  --
+  total_sessions : int
+  avg_session_length : float
+  total_purchases : int
+  country : varchar
+}
+
+entity "dim_products" as products {
+  * product_id : bigint
+  --
+  category_id : bigint
+  category_code : varchar
+  brand : varchar
+  avg_price : decimal
+  total_views : int
+  total_purchases : int
+}
+
+entity "dim_categories" as cat {
+  * category_id : bigint
+  --
+  category_name : varchar
+  parent_category : varchar
+}
+
+' Связи
+users ||--o{ fact : "user_id"
+products ||--o{ fact : "product_id"
+cat ||--o{ products : "category_id"
+
+@enduml

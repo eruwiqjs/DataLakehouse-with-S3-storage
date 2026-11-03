@@ -1,0 +1,69 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: dlh_minio
+    restart: always
+    ports: ["9000:9000", "9001:9001"]
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    command: server /data --console-address ":9001"
+    networks: [dlh_net]
+    volumes: [minio_data:/data]
+
+  postgres:
+    image: postgres:13
+    container_name: dlh_postgres
+    restart: always
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: warehouse
+    networks: [dlh_net]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d warehouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  hive-metastore:
+    build: .
+    container_name: dlh_metastore
+    restart: on-failure
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: "-Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/warehouse -Djavax.jdo.option.ConnectionUserName=user -Djavax.jdo.option.ConnectionPassword=password"
+      # Дублируем переменные для надежности
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: password
+      AWS_REGION: us-east-1
+    volumes:
+      # Монтируем наш жесткий конфиг внутрь контейнера
+      - ./hive-config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks: [dlh_net]
+
+  trino:
+    image: trinodb/trino:latest
+    container_name: dlh_trino
+    restart: always
+    ports: ["8080:8080"]
+    volumes:
+      - ./trino-etc:/etc/trino
+    networks: [dlh_net]
+    depends_on:
+      - hive-metastore
+
+networks:
+  dlh_net:
+
+volumes:
+  minio_data:
+  postgres_data:

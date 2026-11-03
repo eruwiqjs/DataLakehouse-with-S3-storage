@@ -1,0 +1,191 @@
+= Архитектура решения: E-Commerce Data Pipeline
+:doctype: book
+:toc:
+:toclevels: 3
+:icons: font
+:sectnums:
+:source-highlighter: rouge
+
+== Введение
+
+Документ описывает архитектуру проекта *E-Commerce Data Pipeline*, направленного на построение конвейера обработки больших данных (Big Data) на основе открытого набора данных о поведении покупателей в интернет-магазине.
+
+⚙️ *Документ является живым и будет дополняться по мере развития проекта, добавления новых функций и уточнения требований.*
+
+== Цели проекта
+
+* Получить практический опыт работы с большими данными.
+* Освоить инструменты для хранения, очистки и анализа данных.
+* Разработать архитектуру ETL-конвейера.
+* Построить витрины данных и подготовить данные для визуализации в BI-системах.
+
+== Архитектурная концепция
+
+Проект реализует многоуровневую архитектуру обработки данных (Data Lakehouse), включающую:
+
+|===
+| Уровень | Назначение | Формат данных
+
+| *Raw Layer*
+| Сырые данные, загружаемые из внешнего источника (Kaggle)
+| CSV
+
+| *Staging Layer*
+| Промежуточный слой очистки, нормализации и хранения
+| Parquet
+
+| *Mart Layer*
+| Агрегированные витрины данных для аналитики
+| CSV
+
+| *BI Layer*
+| Слой визуализации и аналитики (Power BI, Superset)
+| Dashboard
+|===
+
+== Технологический стек
+
+|===
+| Компонент | Технология | Назначение
+
+| *Язык разработки* | Python 3.11 | Основная логика ETL
+| *Библиотеки Python* | pandas, pyarrow, tqdm, yaml, logging | Обработка и логирование
+| *Хранилище данных* | Локальная файловая система / S3 | Хранение слоёв Raw, Staging, Mart
+| *Формат данных* | CSV, Parquet | Оптимальные форматы для разных стадий
+| *BI-инструменты* | Power BI, Apache Superset | Аналитика и визуализация
+| *Система контроля версий* | Git + GitHub | Версионирование и совместная разработка
+| *Документация* | AsciiDoc, PlantUML | Автоматическая визуализация архитектуры и ERD
+| *IDE* | PyCharm / VSCode | Разработка и тестирование
+| *Планировщик (на будущее)* | Apache Airflow / Prefect | Автоматизация пайплайнов
+| *ОС окружения* | Windows 11 / Ubuntu | Развёртывание и тестирование
+|===
+
+== Архитектура пайплайна
+
+image::img/architecture.puml[]
+
+Основной поток данных:
+
+----
+Data Sources → Raw → Staging → Mart → BI
+----
+
+Этапы пайплайна:
+
+. *Загрузка данных (`load_raw.py`)*
+  Проверка наличия файла, загрузка из Kaggle при необходимости.
+. *Очистка данных (`clean_staging.py`)*
+  Обработка данных чанками, нормализация, удаление дублей, преобразование типов.
+. *Создание витрин (`create_marts.py`)*
+  Формирование витрин `dim_users`, `dim_products`, `dim_categories`, `fact_events`.
+. *Управление пайпом (`main.py`)*
+  Последовательный запуск всех этапов, логирование, проверка ошибок.
+
+== Data Flow Diagram
+
+image::img/data_flow.puml[]
+
+== Модель данных (ERD)
+
+Архитектура слоя Data Mart реализует *звёздную схему (Star Schema)*, обеспечивающую гибкость BI-запросов.
+
+image::img/erd.puml[]
+
+== Атрибутивный состав таблиц
+
+=== Таблица fact_events
+[source,sql]
+----
+CREATE TABLE fact_events (
+    event_id        BIGINT PRIMARY KEY,
+    event_time      DATETIME,
+    event_type      VARCHAR(50),
+    price           DECIMAL(10,2),
+    user_id         BIGINT,
+    product_id      BIGINT,
+    category_code   VARCHAR(255),
+    brand           VARCHAR(100),
+    user_session    VARCHAR(100)
+);
+----
+
+=== Таблица dim_users
+[source,sql]
+----
+CREATE TABLE dim_users (
+    user_id           BIGINT PRIMARY KEY,
+    total_sessions    INT,
+    avg_session_length FLOAT,
+    total_purchases   INT,
+    total_events      INT,
+    country           VARCHAR(100)
+);
+----
+
+=== Таблица dim_products
+[source,sql]
+----
+CREATE TABLE dim_products (
+    product_id       BIGINT PRIMARY KEY,
+    category_id      BIGINT,
+    category_code    VARCHAR(255),
+    brand            VARCHAR(100),
+    avg_price        DECIMAL(10,2),
+    total_views      INT,
+    total_purchases  INT,
+    FOREIGN KEY (category_id) REFERENCES dim_categories(category_id)
+);
+----
+
+=== Таблица dim_categories
+[source,sql]
+----
+CREATE TABLE dim_categories (
+    category_id      BIGINT PRIMARY KEY,
+    category_code    VARCHAR(255),
+    category_name    VARCHAR(255),
+    parent_category  VARCHAR(255)
+);
+----
+
+== Логирование и тестирование
+
+* Логирование всех шагов осуществляется через модуль `logging` в `pipeline.log`.
+* Для тестовых запусков реализован режим `fast_test` в `config.yaml`, ограничивающий объём обрабатываемых данных.
+* Каждое выполнение пайплайна записывает ключевые временные метки и объём обработанных строк.
+
+== Результаты выполнения
+
+После успешного запуска формируются следующие артефакты:
+
+|===
+| Файл | Слой | Описание
+
+| `data/raw/ecommerce_behavior.csv` | Raw | Исходные данные (≈5 ГБ)
+| `data/staging/cleaned_data.parquet` | Staging | Очищенные и нормализованные данные
+| `data/mart/dim_users.csv` | Mart | Агрегаты по пользователям
+| `data/mart/dim_products.csv` | Mart | Агрегаты по товарам
+| `data/mart/dim_categories.csv` | Mart | Иерархия категорий
+| `data/mart/fact_events.csv` | Mart | Центральная таблица событий
+|===
+
+== Документация
+
+Все диаграммы и документация хранятся в папке `docs/`:
+
+* `architecture.puml` — архитектура пайплайна
+* `data_flow.puml` — поток данных (DFD Level 1)
+* `erd.puml` — ERD-модель витрин
+* `architecture.adoc` — данный документ
+
+== Заключение
+
+Разработанная архитектура представляет собой модульную, расширяемую систему для работы с большими данными,
+ориентированную на производительность, простоту сопровождения и готовность к интеграции с BI-инструментами.
+
+=== Дальнейшие этапы
+
+* Интеграция с Power BI / Superset
+* Добавление автоматизации через Apache Airflow или Prefect
+* Тестирование на дополнительных наборах данных
+* Оптимизация SQL-запросов и витрин под аналитические нагрузки

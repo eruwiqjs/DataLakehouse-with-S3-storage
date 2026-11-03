@@ -1,0 +1,16 @@
+paths:
+  raw_dir: "data/raw"
+  staging_dir: "data/staging"
+  mart_dir: "data/mart"
+  raw_file: "data/raw/ecommerce_behavior.csv"
+  staging_file: "data/staging/cleaned_data.parquet"
+
+dataset:
+  kaggle_id: "mkechinov/ecommerce-behavior-data-from-multi-category-store"
+
+logging:
+  log_file: "pipeline.log"
+  log_level: "INFO"
+
+mode:
+  fast_test: true

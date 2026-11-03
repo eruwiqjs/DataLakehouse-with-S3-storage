@@ -1,0 +1,47 @@
+@startuml
+!theme plain
+title "E-Commerce Data Architecture — Core Data Flow"
+
+actor "Data Source\n(Kaggle Dataset)" as source
+
+rectangle "Data Lake (S3 / HDFS)" as lake {
+    frame "Raw Layer" as raw {
+        database "raw/ecommerce_behavior.csv" as raw_data
+    }
+    frame "Staging Layer" as staging {
+        database "staging/cleaned_data.parquet" as staging_data
+    }
+    frame "Mart Layer" as mart {
+        database "mart/fact_events" as fact
+        database "mart/dim_users" as dim_users
+        database "mart/dim_products" as dim_products
+    }
+}
+
+rectangle "ETL Processing (Python / PySpark)" as etl {
+    rectangle "Extract\n(load_raw.py)" as extract
+    rectangle "Transform\n(clean_staging.py)" as transform
+    rectangle "Load\n(create_marts.py)" as load
+}
+
+rectangle "Data Warehouse\n(PostgreSQL / ClickHouse)" as dwh {
+    database "Analytics DB" as db
+}
+
+rectangle "BI Layer\n(Power BI / Superset)" as bi
+
+' Потоки данных
+source --> extract : Upload Kaggle CSV
+extract --> raw_data : Save raw data
+raw_data --> transform : Read raw CSV
+transform --> staging_data : Clean & normalize
+staging_data --> load : Aggregate
+load --> fact : Create fact tables
+load --> dim_users
+load --> dim_products
+fact --> db
+dim_users --> db
+dim_products --> db
+db --> bi : SQL queries for dashboards
+
+@enduml

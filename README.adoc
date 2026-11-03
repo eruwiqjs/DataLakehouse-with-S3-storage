@@ -1,0 +1,103 @@
+= E-Commerce Behavior Data Pipeline
+:toc:
+:icons: font
+:sectnums:
+:source-highlighter: highlightjs
+
+== 📘 Описание проекта
+Проект реализует обработку и анализ пользовательских событий из e-commerce датасета Kaggle.
+
+Пайплайн состоит из трёх слоёв:
+* *Raw* — исходные данные (CSV)
+* *Staging* — очищенные данные (Parquet)
+* *Mart* — аналитические витрины (CSV)
+
+== ⚙️ Технологический стек
+|===
+| Компонент | Технология | Назначение
+
+| Язык
+| Python 3.10+
+| Основная реализация ETL
+
+| Библиотеки
+| pandas, boto3, pyspark, sqlalchemy
+| Очистка и агрегация данных
+
+| Хранилище
+| S3 / HDFS
+| Data Lake для хранения слоёв
+
+| DWH
+| PostgreSQL / ClickHouse
+| Аналитическое хранилище
+
+| BI
+| Power BI / Superset
+| Визуализация данных
+|===
+
+== 🧩 Архитектура
+image::docs/data_flow.png[width=700, align=center]
+
+*Data Flow:* Kaggle Dataset → Raw → Staging → Mart → DWH → BI.
+
+== 🚀 Установка и запуск
+
+[source,bash]
+----
+# Клонировать проект
+git clone https://github.com/TLUMSY/big-data.git
+cd big-data
+
+# Создать виртуальное окружение
+python -m venv venv
+venv\Scripts\activate
+
+# Установить зависимости
+pip install -r requirements.txt
+----
+
+[source,bash]
+----
+# Очистить и обработать данные
+python scripts/clean_staging.py
+
+# Создать витрины
+python scripts/create_marts.py
+----
+
+== 🧠 Структура проекта
+[source,plaintext]
+----
+data/
+  raw/
+  staging/
+  mart/
+scripts/
+sql/
+bi/
+docs/
+----
+
+== 📊 Пример гипотез
+* Категории с наибольшим количеством просмотров приносят больше покупок.
+* Средний чек зависит от бренда.
+* Пользователи с 3+ сессиями чаще совершают покупки.
+
+== 👥 Роли команды
+|===
+| Роль | Участник | Ответственность
+| Архитектор/Team Lead | [Балашов Александр] | Архитектура и документация
+| Data Engineer | [Екатерина ...] | ETL пайплайны
+| Data Engineer | [Санек ...] | ETL пайплайны
+| Analyst | [Зоонг ] | SQL, гипотезы
+| Analyst | [Елена ] | SQL, гипотезы
+| BI | [Пронин Никита] | Визуализация Power BI
+|===
+
+== 📚 Дополнительная документация
+* link:docs/architecture.adoc[Архитектура системы]
+* link:docs/requirements.adoc[Требования и атрибуты данных]
+* link:docs/erd.puml[ERD диаграмма]
+* link:https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store?resource=download[Датасет]
