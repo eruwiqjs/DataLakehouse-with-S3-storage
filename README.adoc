@@ -4,70 +4,71 @@
 :sectnums:
 :source-highlighter: highlightjs
 
-== 📘 Описание проекта
-Проект реализует обработку и анализ пользовательских событий из e-commerce датасета Kaggle.
+== 📘 Project Description
+This project processes and analyzes user events from a Kaggle e-commerce dataset.
 
-Пайплайн состоит из трёх слоёв:
-* *Raw* — исходные данные (CSV)
-* *Staging* — очищенные данные (Parquet)
-* *Mart* — аналитические витрины (CSV)
+The pipeline consists of three layers:
 
-== ⚙️ Технологический стек
+* *Raw* — source data (CSV)
+* *Staging* — cleaned data (Parquet)
+* *Mart* — analytical data marts (CSV)
+
+== ⚙️ Technology Stack
 |===
-| Компонент | Технология | Назначение
+| Component | Technology | Purpose
 
-| Язык
+| Language
 | Python 3.10+
-| Основная реализация ETL
+| Core ETL implementation
 
-| Библиотеки
+| Libraries
 | pandas, boto3, pyspark, sqlalchemy
-| Очистка и агрегация данных
+| Data cleaning and aggregation
 
-| Хранилище
+| Storage
 | S3 / HDFS
-| Data Lake для хранения слоёв
+| Data Lake for storing the layers
 
 | DWH
 | PostgreSQL / ClickHouse
-| Аналитическое хранилище
+| Analytical storage
 
 | BI
 | Power BI / Superset
-| Визуализация данных
+| Data visualization
 |===
 
-== 🧩 Архитектура
+== 🧩 Architecture
 image::docs/data_flow.png[width=700, align=center]
 
 *Data Flow:* Kaggle Dataset → Raw → Staging → Mart → DWH → BI.
 
-== 🚀 Установка и запуск
+== 🚀 Installation and Usage
 
 [source,bash]
 ----
-# Клонировать проект
+# Clone the repository
 git clone https://github.com/TLUMSY/big-data.git
 cd big-data
 
-# Создать виртуальное окружение
+# Create a virtual environment
 python -m venv venv
 venv\Scripts\activate
 
-# Установить зависимости
+# Install dependencies
 pip install -r requirements.txt
 ----
 
 [source,bash]
 ----
-# Очистить и обработать данные
+# Clean and process the data
 python scripts/clean_staging.py
 
-# Создать витрины
+# Build the data marts
 python scripts/create_marts.py
 ----
 
-== 🧠 Структура проекта
+== 🧠 Project Structure
 [source,plaintext]
 ----
 data/
@@ -80,24 +81,24 @@ bi/
 docs/
 ----
 
-== 📊 Пример гипотез
-* Категории с наибольшим количеством просмотров приносят больше покупок.
-* Средний чек зависит от бренда.
-* Пользователи с 3+ сессиями чаще совершают покупки.
+== 📊 Sample Hypotheses
+* Categories with the most views generate more purchases.
+* Average order value depends on the brand.
+* Users with 3+ sessions are more likely to make a purchase.
 
-== 👥 Роли команды
+== 👥 Team Roles
 |===
-| Роль | Участник | Ответственность
-| Архитектор/Team Lead | [Балашов Александр] | Архитектура и документация
-| Data Engineer | [Екатерина ...] | ETL пайплайны
-| Data Engineer | [Санек ...] | ETL пайплайны
-| Analyst | [Зоонг ] | SQL, гипотезы
-| Analyst | [Елена ] | SQL, гипотезы
-| BI | [Пронин Никита] | Визуализация Power BI
+| Role | Member | Responsibility
+| Architect / Team Lead | [Alexander Balashov] | Architecture and documentation
+| Data Engineer | [Ekaterina ...] | ETL pipelines
+| Data Engineer | [Sanek ...] | ETL pipelines
+| Analyst | [Duong] | SQL, hypotheses
+| Analyst | [Elena] | SQL, hypotheses
+| BI | [Nikita Pronin] | Power BI visualization
 |===
 
-== 📚 Дополнительная документация
-* link:docs/architecture.adoc[Архитектура системы]
-* link:docs/requirements.adoc[Требования и атрибуты данных]
-* link:docs/erd.puml[ERD диаграмма]
-* link:https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store?resource=download[Датасет]
+== 📚 Additional Documentation
+* link:docs/architecture.adoc[System architecture]
+* link:docs/requirements.adoc[Requirements and data attributes]
+* link:docs/erd.puml[ERD diagram]
+* link:https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store?resource=download[Dataset]
