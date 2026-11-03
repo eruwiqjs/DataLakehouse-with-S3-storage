@@ -86,17 +86,6 @@ docs/
 * Average order value depends on the brand.
 * Users with 3+ sessions are more likely to make a purchase.
 
-== 👥 Team Roles
-|===
-| Role | Member | Responsibility
-| Architect / Team Lead | [Alexander Balashov] | Architecture and documentation
-| Data Engineer | [Ekaterina ...] | ETL pipelines
-| Data Engineer | [Sanek ...] | ETL pipelines
-| Analyst | [Duong] | SQL, hypotheses
-| Analyst | [Elena] | SQL, hypotheses
-| BI | [Nikita Pronin] | Power BI visualization
-|===
-
 == 📚 Additional Documentation
 * link:docs/architecture.adoc[System architecture]
 * link:docs/requirements.adoc[Requirements and data attributes]
